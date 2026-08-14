@@ -1,0 +1,27 @@
+name: DevSecOps Unified Security Scan
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+permissions:  
+  actions: read
+  security-events: write
+  contents: read
+
+jobs:
+  sast-shellcheck:
+    name: SAST (ShellCheck)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@master
+
+  sca-osv:
+    name: SCA (OSV-Scanner)
+    uses: "google/osv-scanner-action/.github/workflows/osv-scanner-reusable-pr.yml@v2.5.0"
