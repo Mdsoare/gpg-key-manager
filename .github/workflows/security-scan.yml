@@ -190,7 +190,7 @@ jobs:
       [
         secret-scanning,
         secret-scan-gitleaks,
-        saast-shellcheck,
+        sast-shellcheck,
         sast-horusec,
         sast-semgrep,
         sca-osv,
