@@ -31,8 +31,6 @@ jobs:
 
       - name: Scan para detecção de segredos
         uses: trufflesecurity/trufflehog@bcfcf73aaf4759d4dadc2783177c245a02792318
-        with:
-          extra_args: --exclude-paths=\.github/workflows/security-scan\.yml
 
   # -------------------------------------------------------------
   # JOB 2: Detecção de Segredos (Gitleaks)
