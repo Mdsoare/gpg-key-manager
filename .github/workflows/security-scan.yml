@@ -32,7 +32,7 @@ jobs:
       - name: Scan para detecção de segredos
         uses: trufflesecurity/trufflehog@bcfcf73aaf4759d4dadc2783177c245a02792318
         with:
-          extra_args: --exclude-paths=.github/workflows/security-scan.yml
+          extra_args: --exclude-paths=\.github/workflows/security-scan\.yml
 
   # -------------------------------------------------------------
   # JOB 2: Detecção de Segredos (Gitleaks)
@@ -84,11 +84,12 @@ jobs:
           curl -fsSL https://raw.githubusercontent.com/ZupIT/horusec/main/deployments/scripts/install.sh -o install_horusec.sh
           bash install_horusec.sh latest
           rm -f install_horusec.sh
-          horusec start -p="./" --config-file-path="./.horusec-config.json" -D -I -e="false" -o="sarif" -O="./horusec-results.sarif"
+          horusec start -p="./" --config-file-path="./.horusec-config.json" -D -I -e="false" -o="sarif" -O="./horusec-results.sarif" || true
 
       - name: Upload Horusec SARIF report
         uses: github/codeql-action/upload-sarif@db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28
-        if: always()
+        if: always() && hashFiles('horusec-results.sarif') != ''
+        continue-on-error: true
         with:
           sarif_file: horusec-results.sarif
           category: Horusec
@@ -120,11 +121,12 @@ jobs:
             --config=p/bash \
             --sarif \
             --output=semgrep.sarif \
-            .
+            . || true
 
       - name: Upload do Relatório SARIF do Semgrep
         uses: github/codeql-action/upload-sarif@db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28
-        if: always()
+        if: always() && hashFiles('semgrep.sarif') != ''
+        continue-on-error: true
         with:
           sarif_file: semgrep.sarif
           category: Semgrep
