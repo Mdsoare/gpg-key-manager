@@ -51,7 +51,23 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # -------------------------------------------------------------
-  # JOB 3: Qualidade de Código e Linters (ShellScript)
+  # JOB 3: Qualidade de Sintaxe Docs (Markdown)
+  # -------------------------------------------------------------
+  markdown-lint:
+    name: Lint Markdown Docs
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Lint Markdown Files
+        uses: DavidAnson/markdownlint-cli2-action@21c1be1b93ad9ed58fa840aacc3f279cde2a72ff
+        with:
+          globs: "**/*.md"
+
+  # -------------------------------------------------------------
+  # JOB 4: Qualidade de Código e Linters (ShellScript)
   # -------------------------------------------------------------
   sast-shellcheck:
     name: SAST (ShellCheck)
@@ -67,7 +83,7 @@ jobs:
           ignore_paths: ".cache build dist artifacts"
 
   # -------------------------------------------------------------
-  # JOB 4: SAST Open Source com Horusec
+  # JOB 5: SAST Open Source com Horusec
   # -------------------------------------------------------------
   sast-horusec:
     name: SAST (Horusec Scan)
@@ -82,7 +98,7 @@ jobs:
           curl -fsSL https://raw.githubusercontent.com/ZupIT/horusec/main/deployments/scripts/install.sh -o install_horusec.sh
           bash install_horusec.sh latest
           rm -f install_horusec.sh
-          horusec start -p="./" --config-file-path="./.horusec-config.json" -D -I -e="false" -o="sarif" -O="./horusec-results.sarif" || true
+          horusec start -p="./" --config-file-path="./.horusec.json" -D -I -e="false" -o="sarif" -O="./horusec-results.sarif" || true
 
       - name: Upload Horusec SARIF report
         uses: github/codeql-action/upload-sarif@db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28
@@ -93,7 +109,7 @@ jobs:
           category: Horusec
 
   # -------------------------------------------------------------
-  # JOB 5: SAST baseado em Regras com Semgrep
+  # JOB 6: SAST baseado em Regras com Semgrep
   # -------------------------------------------------------------
   sast-semgrep:
     name: SAST (Semgrep Scan)
@@ -130,7 +146,7 @@ jobs:
           category: Semgrep
 
   # -------------------------------------------------------------
-  # JOB 6: Análise de Dependências Multilinguagem com OSV-Scanner
+  # JOB 7: Análise de Dependências Multilinguagem com OSV-Scanner
   # -------------------------------------------------------------
   sca-osv:
     name: SCA (OSV-Scanner)
@@ -139,7 +155,7 @@ jobs:
       scan-args: "--allow-no-lockfiles --recursive ./"
 
   # -------------------------------------------------------------
-  # JOB 7: Análise de Dependências e Misconfigurations com Trivy
+  # JOB 8: Análise de Dependências e Misconfigurations com Trivy
   # -------------------------------------------------------------
   sca-trivy:
     name: SCA & Misconfig (Trivy Scan)
@@ -166,7 +182,7 @@ jobs:
           category: Trivy
 
   # -------------------------------------------------------------
-  # JOB 8: Validação de Integridade do Projeto
+  # JOB 9: Validação de Integridade do Projeto
   # -------------------------------------------------------------
   project-structure-check:
     name: Validate Project Structure
@@ -182,7 +198,7 @@ jobs:
           echo "✅ Estrutura básica do repositório validada."
 
   # -------------------------------------------------------------
-  # JOB 9: Build e Agrupamento dos Artefatos
+  # JOB 10: Build e Agrupamento dos Artefatos
   # -------------------------------------------------------------
   build-artifact:
     name: Bundle & Upload Artifact
@@ -190,6 +206,7 @@ jobs:
       [
         secret-scanning,
         secret-scan-gitleaks,
+        Lint Markdown Docs,
         sast-shellcheck,
         sast-horusec,
         sast-semgrep,
@@ -205,10 +222,10 @@ jobs:
 
       - name: Gerar pacote de artefatos
         run: |
-          mkdir -p build_artifact
+          mkdir -p build_artifact/scripts
           cp -r README.md build_artifact/ 2>/dev/null || true
-          if [ -f package.json ]; then cp package.json build_artifact/; fi
-
+          cp -r scripts/ build_artifact/ 2>/dev/null || true
+          
       - name: Subir Artefato de Build
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
