@@ -206,7 +206,7 @@ jobs:
       [
         secret-scanning,
         secret-scan-gitleaks,
-        Lint Markdown Docs,
+        markdown-lint,
         sast-shellcheck,
         sast-horusec,
         sast-semgrep,
